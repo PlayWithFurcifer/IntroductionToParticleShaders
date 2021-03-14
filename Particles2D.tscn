@@ -1,0 +1,48 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://particle.png" type="Texture" id=1]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type particles;
+
+float rand_from_seed(inout uint seed) {
+	int k;
+	int s = int(seed);
+	if (s == 0)
+	s = 305420679;
+	k = s / 127773;
+	s = 16807 * (s - k * 127773) - 2836 * k;
+	if (s < 0)
+		s += 2147483647;
+	seed = uint(s);
+	return float(seed % uint(65536)) / 65535.0;
+}
+
+
+void vertex() {
+	
+	uint seed = NUMBER + RANDOM_SEED;
+	if (RESTART) {
+		vec3 direction = vec3(rand_from_seed(seed) - 0.5, rand_from_seed(seed) - 0.5, 0);
+		float speed = rand_from_seed(seed) * 500.0;
+		VELOCITY = direction * speed;
+	}
+	else {
+		VELOCITY.y += 2.0;
+	}
+	if (TRANSFORM[3].x > 200.0)
+	{
+		VELOCITY = vec3(0);
+	}
+	
+	COLOR.a = max(COLOR.a - DELTA, 0.0);
+}"
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = SubResource( 1 )
+
+[node name="Particles2D" type="Particles2D"]
+amount = 5
+lifetime = 5.0
+process_material = SubResource( 2 )
+texture = ExtResource( 1 )
